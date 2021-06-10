@@ -1,6 +1,6 @@
 // f(x) = 3x^3 + cos(7x) - ln(2x)
 //[1;40]
-//metoda prostokatow z dx = 0.0001
+//metoda prostokatow z dx = 0.00001
 
 package main
 
@@ -21,7 +21,7 @@ var (
 //variables declaration
 func integral(minimal float64) {
     wg.Add(1)
-    time.Sleep(5 * time.Second)
+    time.Sleep(10 * time.Second)
     tmp = 0
     for i := minimal; i < minimal + 10; i += dx {
         fx += (3 * math.Pow(i, 3) + math.Cos(7 * i) - math.Log(2 * i))*dx
@@ -35,15 +35,13 @@ func main() {
     time0 := time.Now()
     wg.Add(0)
     go integral(1)
-    //time.Sleep(1000)
     go integral(10)
-    //time.Sleep(1000)
     go integral(20)
-    //time.Sleep(1000)
     go integral(30)
-    //time.Sleep(1000)
     wg.Wait()
     time1 := time.Now()
-    fmt.Printf("%v\n",fx)
-    fmt.Printf("It took %v nanoseconds.\n",time1.Sub(time0).Nanoseconds())
+    fmt.Printf("Disclaimer: this program does not calculate the integral correctly due")
+    fmt.Printf(" to lack of control over access to the shared variable\n")
+    fmt.Printf("Given integral on the interval <1;40> is equal to:\n%v\n",fx)
+    fmt.Printf("Program took %v nanoseconds to run.\n",time1.Sub(time0).Nanoseconds())
 }

@@ -1,6 +1,6 @@
 // f(x) = 3x^3 + cos(7x) - ln(2x)
 //[1;40]
-//metoda prostokatow z dx = 0.0001
+//metoda prostokatow z dx = 0.00001
 
 package main
 
@@ -22,7 +22,7 @@ var (
 func integral(minimal float64) {
     tmp := 0.0
     wg.Add(1)
-    time.Sleep(5 * time.Second)
+    time.Sleep(10 * time.Second)
     for i := minimal; i < minimal + 10; i += dx {
         tmp += (3 * math.Pow(i, 3) + math.Cos(7 * i) - math.Log(2 * i))*dx
     }
@@ -43,7 +43,6 @@ func main() {
     go integral(30)
     wg.Wait()
     time1 := time.Now()
-    fmt.Printf("Given integral in the section <0;40> is equal to:\n")
-    fmt.Printf("%v\n",fx)
+    fmt.Printf("Given integral on the interval <1;40> is equal to:\n%v\n",fx)
     fmt.Printf("Program took %v nanoseconds to run.\n",time1.Sub(time0).Nanoseconds())
 }
