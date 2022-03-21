@@ -11,8 +11,8 @@ import (
 var r = rand.New(rand.NewSource(1))
 
 type SeqLock struct {
-	Counter      int32      //zwiększa się o 1 po zajęciu zamka przez pisarza i tuż przed zwolnieniem tego zamka (sequence number)
-	ZamekPisarzy sync.Mutex //zamek tylko dla pisarzy
+	Counter    int32 //zwiększa się o 1 po zajęciu zamka przez pisarza i tuż przed zwolnieniem tego zamka (sequence number)
+	sync.Mutex       //zamek tylko dla pisarzy
 }
 
 //funkcja odczytująca atomowo licznik seqlocka
@@ -26,17 +26,17 @@ func (seq *SeqLock) rdAgain(val int32) bool {
 }
 
 func (seq *SeqLock) wrLock() {
-	seq.ZamekPisarzy.Lock()
+	seq.Lock()
 	atomic.AddInt32(&seq.Counter, 1) //counter staje sie nieparzysty gdy pisarz zaczyna działać
 }
 
 func (seq *SeqLock) wrUnlock() {
 	atomic.AddInt32(&seq.Counter, 1) //counter staje się z powrotem parzysty po skończeniu pracy na danych
-	seq.ZamekPisarzy.Unlock()
+	seq.Unlock()
 }
 
 //funkcja przedstawiająca cały proces odczytywania danych
-func (seq *SeqLock) ReadingData() {
+func (seq *SeqLock) ReadingData(wg *sync.WaitGroup) {
 
 	tmp := int32(0)
 	for {
@@ -53,10 +53,11 @@ func (seq *SeqLock) ReadingData() {
 			break
 		}
 	}
+	defer wg.Done()
 }
 
 //funkcja przedstawiająca proces zapisu danych
-func (seq *SeqLock) WritingData() {
+func (seq *SeqLock) WritingData(wg *sync.WaitGroup) {
 
 	time.Sleep(time.Duration(r.Int31()) * 1)
 	seq.wrLock()
@@ -67,6 +68,7 @@ func (seq *SeqLock) WritingData() {
 	*/
 	fmt.Printf("zapis (w trakcie), licznik nieparzysty: %d\n", seq.Counter)
 	seq.wrUnlock()
+	defer wg.Done()
 }
 
 //Przykładowy program przedstawiający uproszczone działanie zaimplementowanego seqlocka
@@ -74,14 +76,17 @@ func (seq *SeqLock) WritingData() {
 func main() {
 	SequenceLock := SeqLock{Counter: 0}
 
+	var wg sync.WaitGroup
+
 	for i := 0; i < 100; i++ {
 		if rand.Intn(100) <= 80 {
-			go SequenceLock.ReadingData()
+			wg.Add(1)
+			go SequenceLock.ReadingData(&wg)
 		} else {
-			go SequenceLock.WritingData()
+			wg.Add(1)
+			go SequenceLock.WritingData(&wg)
 		}
 	}
 
-	time.Sleep((10 * time.Second))
-
+	wg.Wait()
 }

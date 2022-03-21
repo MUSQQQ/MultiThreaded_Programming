@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	//"math/rand"
 	"sync"
 	"time"
 )
@@ -18,12 +17,10 @@ type Book struct{ sync.Mutex }
 
 type Philosopher struct {
 	Num int
-	Mut sync.Mutex
 }
 
 func (p *Philosopher) Think() {
 	fmt.Printf("Philosopher %d is thinking\n", p.Num)
-
 	time.Sleep(time.Duration(r.Int31()) * 3)
 	fmt.Printf("Philosopher %d got hungry\n", p.Num)
 	time.Sleep(time.Duration(r.Int31()) * 1)
@@ -81,8 +78,5 @@ func main() {
 	}
 
 	wg.Wait()
-	//time.Sleep(30 * time.Second)
-	//fmt.Println(rand.Intn(6))
-
 	fmt.Println("Program finished")
 }
